@@ -1,18 +1,18 @@
 <?php
 /*
 Plugin Name: SPNBabble
-Plugin URI: http://blog.highcorral.com/spnbabble-plugin
-Description: Generates SPNBabble Updates when a new Post is Published.
-Author: Scott Stanger
+Plugin URI: http://www.themespluginswp.com/plugins/spn-babblespn-babble/
+Description: Generates SPNBabble Mini Blog Updates when a new Post is Published.
+Author: Darren Dunner
 Version: 1.1
-Author URI: http://www.highcorral.com/
+Author URI: http://www.themespluginswp.com/
 */
 
 /**
  * Changelog
  *
  * 1.1	4/27/2009
- * 			Made posting to SPNBabble conditional by adding a new Config
+ * 			Made posted to SPNBabble conditional by adding a new Config
  *			Setting.
  *
  * 1.0	4/22/2009
@@ -127,11 +127,11 @@ function doUpdate($text = '')
 	
 	require_once(ABSPATH.WPINC.'/class-snoopy.php');
 	$snoop = new Snoopy;
-	$snoop->agent = 'SPNBabble http://www.highcorral.com/spnbabble-plugin';
+	$snoop->agent = 'SPNBabble http://www.themespluginswp.com/plugins/spn-babblespn-babble/';
 	$snoop->rawheaders = array(
 		'X-Laconica-Client' => 'SPNBabble',
 		'X-Laconica-Client-Version' => G_VERSION,
-		'X-Laconica-Client-URL' => 'http://www.highcorral.com/spnbabble-plugin',
+		'X-Laconica-Client-URL' => 'http://www.themespluginswp.com/plugins/spn-babblespn-babble/',
 	);
 	$snoop->user = $spnbabble_username;
 	$snoop->pass = $spnbabble_password;
@@ -194,7 +194,7 @@ function spnbabble_options_subpanel()
 
 		<p>
 			<h3>General Options</h3>
-			You can find out more information about this plugin at <a href="http://blog.highcorral.com/spnbabble-plugin">the SPNBabble Plugin page</a>.
+			You can find out more information about this plugin at <a href="http://www.themespluginswp.com/plugins/spn-babblespn-babble/">the SPNBabble Plugin page</a>.
 		</p>
 		<br />
 		<form method="post">
