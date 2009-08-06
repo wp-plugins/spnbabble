@@ -1,20 +1,18 @@
-=== SPNBabble ===
+=== SPNbabble ===
 Contributors: Dunner, Darren
 Donate link: http://themespluginswp.com/
 Tags: microblogs, micro blog, twitter, tweet, integration, post, digest, notify, integrate, archive, social, babble
 Requires at least: 2.0.2
 Tested up to: 2.7.1
-Stable tag: 1.1
+Stable tag: 1.2
 
-SPNBabble Social plugin connects your blog to spnbabble.sitepronews.com and then connects to 5 other microblog sites - Twitter, Friendfeed, Plurk, Tumblr & Facebook.
+SPNbabble Social plugin connects your blog to spnbabble.sitepronews.com and then connects to 5 other microblog sites - Twitter, Friendfeed, Plurk, Tumblr & Facebook.
 
 == Description ==
 
-SPNBabble (http://spnbabble.sitepronews.com) allows users to create an account and post 140 character blogs with urls to send out messages to your followers. Through the professional setup of SPNBabble you can also auto connect toTwitter, Friendfeed, Plurk, Tumblr & Facebook.
+SPNbabble (http://spnbabble.sitepronews.com) allows users to create an account and post 140 character blogs with urls to send out messages to your followers. Through the professional setup of SPNbabble you can also auto connect to Twitter, Friendfeed, Plurk, Tumblr, Facebook, Zannel, Youare, Meemi & Utterli.
 
-By simply creating an account at http://spnbabble.sitepronews.com and then choosing the "Connect" option you can have an automated process to create 1 mini blog sent out to 6 micro blog sites. 
-
-This plugin once installed allows you to enter your SPNBabble user and password and you can choose which blog posts will be converted into mini blogs. Your blog turned into 6 mini blogs on the most popular social media platforms is a great way to keep your message strong. 
+This plugin once installed allows you to enter your SPNbabble user and password and you can choose which blog posts will be converted into mini blogs. Your blog turned into several mini blogs on the most popular social media platforms is a great way to keep your message strong. 
 
 Why are these mini blogs so popular
 
@@ -26,14 +24,14 @@ Why are these mini blogs so popular
 == Installation ==
 
 1. Download the plugin and extract the contents of the plugin
-2. You will have a folder called SPNBabble and inside the folder spnbabble.php 
+2. You will have a folder called SPNbabble and inside the folder spnbabble.php 
 3. Upload this folder to wp-content/plugins/ directory.
-4. Go to the Plugins page in your WordPress Admin area and click 'Activate' for SPNBabble.
-5. Go to the Settings >> SPNBabble Options to enter a Title, User/pass and turn the plugin on.
+4. Go to the Plugins page in your WordPress Admin area and click 'Activate' for SPNbabble.
+5. Go to the Settings >> SPNbabble Options to enter a Title, User/pass and turn the plugin on.
 
 == Configuration ==
 
-Login to your wordpress admin and under "Settings >> SPNBabble" you can enter a title or keyword, username and password and turn the plugin on or off anytime. This way you control when your blogs are converted into mini blogs. 
+Login to your wordpress admin and under "Settings >> SPNbabble" you can enter a title or keyword, username and password and turn the plugin on or off anytime. This way you control when your blogs are converted into mini blogs. 
 
 == Frequently Asked Questions ==
 

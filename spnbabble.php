@@ -4,12 +4,16 @@ Plugin Name: SPNBabble
 Plugin URI: http://www.themespluginswp.com/plugins/spn-babblespn-babble/
 Description: Generates SPNBabble Mini Blog Updates when a new Post is Published.
 Author: Darren Dunner
-Version: 1.1
+Version: 1.2
 Author URI: http://www.themespluginswp.com/
 */
 
 /**
  * Changelog
+ * 
+ * 1.2  7/13/2009
+ *			Added a new configuration setting so that you can specify
+ *			the Post Prefix (by default, it is set to "New Blog Post:").
  *
  * 1.1	4/27/2009
  * 			Made posted to SPNBabble conditional by adding a new Config
@@ -34,7 +38,7 @@ $spnbabble_plugin_prefix = 'spnbabble_';
 // Full URI of SPNBabble without trailing slash
 define('SPNBABBLE_URI', 'http://spnbabble.sitepronews.com');
 define('SPN_API_POST_STATUS', SPNBABBLE_URI.'/api/statuses/update.json');
-define('G_VERSION', '1.1');
+define('G_VERSION', '1.2');
 
 add_action('publish_post', 'postPublished');
 
@@ -70,6 +74,9 @@ function postPublished($post_id = 0)
 	
 	// If Yes then we update SPNBabble by default
 	$spn_update	 = get_option($spnbabble_plugin_prefix . 'spn_update', 0);
+
+	// Prepend the notices with this
+	$postprefix	 = get_option($spnbabble_plugin_prefix . 'postprefix', 0);
 	
 	// If No then we update SPNBabble, if Yes then we do not
 	$has_been_babbled 	= get_post_meta($post_id, 'has_been_babbled', true);
@@ -98,7 +105,19 @@ function postPublished($post_id = 0)
 			return;
 		}
 
-		$text = sprintf(__('New Blog Post: %s %s', 'spnbabble'), $post->post_title, get_permalink($post_id));
+		// The postprefix is prepending -- so that it looks like this:
+		// "New Blog Post: <title> <permalink>"
+		// But the blog owner can use an empty string -- so check the format
+		if (empty($postprefix))
+		{
+			$postprefix = '';
+		}
+		else
+		{
+			// Ensure there is a trailing space
+			$postprefix = rtrim($postprefix) . ' ';
+		}
+		$text = sprintf(__('%s%s %s', 'spnbabble'), $postprefix, $post->post_title, get_permalink($post_id));
 		doUpdate($text);
 
 		add_post_meta($post_id, 'has_been_babbled', 'Yes');
@@ -165,12 +184,14 @@ function spnbabble_options_subpanel()
 		$username		= isset($_POST['username'])?$_POST['username']:'';
 		$password		= isset($_POST['password'])?$_POST['password']:'';
 		$blogname		= isset($_POST['blogname'])?$_POST['blogname']:'';
+		$postprefix		= isset($_POST['postprefix'])?$_POST['postprefix']:'';
 		$spn_enable	= isset($_POST['spn_enable'])?$_POST['spn_enable']:'';
 		$spn_update	= isset($_POST['spn_update'])?$_POST['spn_update']:'';
 
 		update_option($spnbabble_plugin_prefix . 'username', $username);
 		update_option($spnbabble_plugin_prefix . 'password', $password);
 		update_option($spnbabble_plugin_prefix . 'blogname', $blogname);
+		update_option($spnbabble_plugin_prefix . 'postprefix', $postprefix);
 		update_option($spnbabble_plugin_prefix . 'spn_enable', $spn_enable);
 		update_option($spnbabble_plugin_prefix . 'spn_update', $spn_update);
 	} 
@@ -179,9 +200,13 @@ function spnbabble_options_subpanel()
 		$username		= get_option($spnbabble_plugin_prefix . 'username');
 		$password 		= get_option($spnbabble_plugin_prefix . 'password');
 		$blogname 	= get_option($spnbabble_plugin_prefix . 'blogname');
+		$postprefix 	= get_option($spnbabble_plugin_prefix . 'postprefix');
 		$spn_enable	= get_option($spnbabble_plugin_prefix . 'spn_enable');
 		$spn_update	= get_option($spnbabble_plugin_prefix . 'spn_update');
-		
+	
+		// The first time the plugin is installed, the value of "spn_enable"
+		// will be empty.	
+		if (empty($spn_enable)) $postprefix = 'New Blog Post:';
 		if (empty($spn_enable)) $spn_enable = 'Yes';
 		if (empty($spn_update)) $spn_update = 'Yes';
 		
@@ -202,6 +227,7 @@ function spnbabble_options_subpanel()
 			SPNBabble Password: <input type="password" name="password" value="<?php echo($password); ?>"><br />
 			<br />
 			Wordpress Blog Name: <input type="text" name="blogname" value="<?php echo($blogname); ?>"><br />
+			SPNbabble Notice Prefix: <input type="text" name="postprefix" value="<?php echo($postprefix); ?>"> <i>Ex: "New Blog Post:"</i><br />
 			<br />
 			<div>
 				<fieldset style="border:1px solid #cccccc; padding:5px;">
