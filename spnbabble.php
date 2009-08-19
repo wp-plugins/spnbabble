@@ -1,22 +1,34 @@
 <?php
 /*
-Plugin Name: SPNBabble
+Plugin Name: SPNbabble
 Plugin URI: http://www.themespluginswp.com/plugins/spn-babblespn-babble/
-Description: Generates SPNBabble Mini Blog Updates when a new Post is Published.
-Author: Darren Dunner
-Version: 1.2
-Author URI: http://www.themespluginswp.com/
+Description: Generates SPNbabble Mini Blog Updates when a new Post is Published.
+Author: Scott Stanger
+Version: 1.3
+Author URI: http://www.highcorral.com/
 */
 
 /**
  * Changelog
  * 
+ * 1.3  8/19/2009
+ *			Improved error handling.  If the update fails, display the
+ *			response in the Custom Field "has_been_babbled".  Typical
+ *			failures are 
+ *				401: Invalid username/password
+ *				406: Post is too long
+ *			If SPNbabble accepts the post then the Custom Field
+ *			"has_been_babbled" will be set to "Yes"
+ *			Also force the SPNbabble username that is supplied on the
+ *			plugin configuration page to lowercase since SPNbabble
+ *			requires the username to be all lowercase.
+ *
  * 1.2  7/13/2009
  *			Added a new configuration setting so that you can specify
  *			the Post Prefix (by default, it is set to "New Blog Post:").
  *
  * 1.1	4/27/2009
- * 			Made posted to SPNBabble conditional by adding a new Config
+ * 			Made posted to SPNbabble conditional by adding a new Config
  *			Setting.
  *
  * 1.0	4/22/2009
@@ -24,40 +36,40 @@ Author URI: http://www.themespluginswp.com/
  *
  * Compatibility
  * Wordpress Version 2.71
- * Laconica Version 0.7.2.1 (SPNBabble is powered by Laconica)
+ * Laconica Version 0.7.2.1 (SPNbabble is powered by Laconica)
  *
  * Wordpress <http://wordpress.org>
  * Laconica <http://laconi.ca>
- * SPNBabble <http://spnbabble.sitepronews.com>
+ * SPNbabble <http://spnbabble.sitepronews.com>
  */
  
 
-$spnbabble_plugin_name = 'SPNBabble';
+$spnbabble_plugin_name = 'SPNbabble';
 $spnbabble_plugin_prefix = 'spnbabble_';
 
-// Full URI of SPNBabble without trailing slash
+// Full URI of SPNbabble without trailing slash
 define('SPNBABBLE_URI', 'http://spnbabble.sitepronews.com');
 define('SPN_API_POST_STATUS', SPNBABBLE_URI.'/api/statuses/update.json');
-define('G_VERSION', '1.2');
+define('G_VERSION', '1.3');
 
 add_action('publish_post', 'postPublished');
 
 /**
- * Post the blog entry to SPNBabble.
+ * Post the blog entry to SPNbabble.
  * The post must be 'published'.
  *
- * This is how the the plugin will post the update to SPNBabble:
+ * This is how the the plugin will post the update to SPNbabble:
  * 1)	A blog post is published (whether it is a New post or we are Updating
  *		and existing post.)
  * 2)	If the Custom Field 'enable_babble' does not exist then we
  *		add it with a value of 'no' (this will prevent the plugin from
- *		automaticaly posting an update to SPNBabble.
+ *		automaticaly posting an update to SPNbabble.
  *	3) if the Custom Field 'enable_babble' equals 'yes' then we
  *		check the value of the Custom Field 'has_been_babbled'.
- * 3)	If 'has_been_babbled' does not equal 'yes' then we post an
- *		update to SPNBabble. and add the Custom Field 'has_been_babbled' 
+ * 4)	If 'has_been_babbled' does not equal 'yes' then we post an
+ *		update to SPNbabble. and add the Custom Field 'has_been_babbled' 
  *		and set its value to 'yes'
- * 5) To post a follow-up update to SPNBabble whenever the blog post
+ * 5) To post a follow-up update to SPNbabble whenever the blog post
  *		is updated, we can either delete the Custom Field 'has_been_babbled'
  *		or set its value to something other than 'yes' and then save the blog
  *		post.
@@ -69,16 +81,16 @@ function postPublished($post_id = 0)
 	// Check the config settings.
 	global $spnbabble_plugin_prefix;
 	
-	// If No then we won't update SPNBabble
+	// If No then we won't update SPNbabble
 	$spn_enable	 = get_option($spnbabble_plugin_prefix . 'spn_enable', 0);
 	
-	// If Yes then we update SPNBabble by default
+	// If Yes then we update SPNbabble by default
 	$spn_update	 = get_option($spnbabble_plugin_prefix . 'spn_update', 0);
 
 	// Prepend the notices with this
 	$postprefix	 = get_option($spnbabble_plugin_prefix . 'postprefix', 0);
 	
-	// If No then we update SPNBabble, if Yes then we do not
+	// If No then we update SPNbabble, if Yes then we do not
 	$has_been_babbled 	= get_post_meta($post_id, 'has_been_babbled', true);
 
 
@@ -118,15 +130,34 @@ function postPublished($post_id = 0)
 			$postprefix = rtrim($postprefix) . ' ';
 		}
 		$text = sprintf(__('%s%s %s', 'spnbabble'), $postprefix, $post->post_title, get_permalink($post_id));
-		doUpdate($text);
+		$response = doUpdate($text);
 
-		add_post_meta($post_id, 'has_been_babbled', 'Yes');
+		if (strpos($response, '200') !== false)
+		{
+			// HTTP/1.1 200 OK
+			add_post_meta($post_id, 'has_been_babbled', 'Yes');
+		}
+		elseif (strpos($response, '401') !== false)
+		{
+			// HTTP/1.1 401 Unauthorized -- This happens when you use an invalid username/password
+			add_post_meta($post_id, 'has_been_babbled', 'No (401: invalid username/password)');
+		}
+		elseif (strpos($response, '406') !== false)
+		{
+			// HTTP/1.1 406 Not Acceptable -- This happens when the post is too long
+			add_post_meta($post_id, 'has_been_babbled', 'No (406: post is too long)');
+		}
+		else
+		{
+			// Update failed
+			add_post_meta($post_id, 'has_been_babbled', $response);
+		}
 	}
 	
 } // postPublished()
 	
 /**
- * Post the blog entry to the SPNBabble.
+ * Post the blog entry to the SPNbabble.
  *
  * @param string $text
  * @return boolean
@@ -135,7 +166,8 @@ function doUpdate($text = '')
 {
 	global $spnbabble_plugin_prefix;
 
-	$spnbabble_username	 = get_option($spnbabble_plugin_prefix . 'username', 0);
+	// Force the username to lowercase since SPNbabble will reject it otherwise
+	$spnbabble_username	 = strtolower(get_option($spnbabble_plugin_prefix . 'username', 0));
 	$spnbabble_password 	= get_option($spnbabble_plugin_prefix . 'password', 0);
 	$spnbabble_blogname 	= get_option($spnbabble_plugin_prefix . 'blogname', 0);
 	
@@ -146,9 +178,9 @@ function doUpdate($text = '')
 	
 	require_once(ABSPATH.WPINC.'/class-snoopy.php');
 	$snoop = new Snoopy;
-	$snoop->agent = 'SPNBabble http://www.themespluginswp.com/plugins/spn-babblespn-babble/';
+	$snoop->agent = 'SPNbabble http://www.themespluginswp.com/plugins/spn-babblespn-babble/';
 	$snoop->rawheaders = array(
-		'X-Laconica-Client' => 'SPNBabble',
+		'X-Laconica-Client' => 'SPNbabble',
 		'X-Laconica-Client-Version' => G_VERSION,
 		'X-Laconica-Client-URL' => 'http://www.themespluginswp.com/plugins/spn-babblespn-babble/',
 	);
@@ -162,6 +194,7 @@ function doUpdate($text = '')
 		)
 	);
 
+	return $snoop->response_code;
 	return (strpos($snoop->response_code, '200')) ?true:false;
 
 } // doUpdate()
@@ -215,24 +248,24 @@ function spnbabble_options_subpanel()
 
 	?>
 	<div class=wrap>
-		<h2>SPNBabble Options</h2>
+		<h2>SPNbabble Options</h2>
 
 		<p>
 			<h3>General Options</h3>
-			You can find out more information about this plugin at <a href="http://www.themespluginswp.com/plugins/spn-babblespn-babble/">the SPNBabble Plugin page</a>.
+			You can find out more information about this plugin at <a href="http://www.themespluginswp.com/plugins/spn-babblespn-babble/">the SPNbabble Plugin page</a>.  If you have questions you may contact the author <a href="mailto:sstanger@highcorral.com">Scott Stanger</a>.
 		</p>
 		<br />
 		<form method="post">
-			SPNBabble Username: <input type="text" name="username" value="<?php echo($username); ?>"><br />
-			SPNBabble Password: <input type="password" name="password" value="<?php echo($password); ?>"><br />
+			SPNbabble Username: <input type="text" name="username" value="<?php echo($username); ?>"><br />
+			SPNbabble Password: <input type="password" name="password" value="<?php echo($password); ?>"><br />
 			<br />
 			Wordpress Blog Name: <input type="text" name="blogname" value="<?php echo($blogname); ?>"><br />
 			SPNbabble Notice Prefix: <input type="text" name="postprefix" value="<?php echo($postprefix); ?>"> <i>Ex: "New Blog Post:"</i><br />
 			<br />
 			<div>
 				<fieldset style="border:1px solid #cccccc; padding:5px;">
-					<legend>Enable SPNBabble Plugin</legend>
-					<label for="spn_enable">Enable the option to update SPNBabble when you post in your blog?</label>
+					<legend>Enable SPNbabble Plugin</legend>
+					<label for="spn_enable">Enable the option to update SPNbabble when you post in your blog?</label>
 					<select name="spn_enable" id="spn_enable">
 						<option value="Yes" <?php if ($spn_enable == 'Yes') echo 'selected="selected"'; ?>>Yes</option>
 						<option value="No" <?php if ($spn_enable != 'Yes') echo 'selected="selected"'; ?>>No</option>
@@ -242,22 +275,22 @@ function spnbabble_options_subpanel()
 			<br />
 			<div class="option">
 				<fieldset style="border:1px solid #cccccc; padding:5px;">
-					<legend>Update SPNBabble</legend>
-					<label for="spn_enable">Update SPNBabble by default?</label>
+					<legend>Update SPNbabble</legend>
+					<label for="spn_enable">Update SPNbabble by default?</label>
 					<select name="spn_update" id="spn_update">
 						<option value="Yes" <?php if ($spn_update == 'Yes') echo 'selected="selected"'; ?>>Yes</option>
 						<option value="No" <?php if ($spn_update != 'Yes') echo 'selected="selected"'; ?>>No</option>
 					</select>
 					<p>
-						<em>If "Yes" (and 'Enable SPNBabble Plugin' is "Yes") then your Blog posts will automatically create an update for SPNBabble when you save it for the first time.  If you set it to "No" you can still create the update but you will do it on a post by post basic using the Custom Field.</em>
+						<em>If "Yes" (and 'Enable SPNbabble Plugin' is "Yes") then your Blog posts will automatically create an update for SPNbabble when you save it for the first time.  If you set it to "No" you can still create the update but you will do it on a post by post basic using the Custom Field.</em>
 					</p>
 				</fieldset>
 			</div>
 
-
-			
 			<div class="submit"><input type="submit" name="info_update" value="Update Options" /></div>
 		</form>
+
+		<div><a href="http://spnbabble.sitepronews.com"><img src="http://spnbabble.sitepronews.com/spn_tran_1a.png" width="245" height="58" alt="SPNbabble" title="Visit SPNbabble"></a></div>
 
 	</div>
 	
