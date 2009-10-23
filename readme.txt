@@ -1,10 +1,10 @@
 === SPNbabble ===
-Contributors: Dunner, Darren
+Contributors: Dunner, Darren, Izonei
 Donate link: http://themespluginswp.com/
 Tags: microblogs, micro blog, twitter, tweet, integration, post, digest, notify, integrate, archive, social, babble
 Requires at least: 2.0.2
-Tested up to: 2.8.4
-Stable tag: 1.3
+Tested up to: 2.8.5
+Stable tag: 1.4.1
 
 SPNbabble Social plugin connects your blog to spnbabble.sitepronews.com and then connects to several other microblog sites including Twitter, Friendfeed, Plurk, Tumblr & Facebook.
 

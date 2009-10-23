@@ -1,16 +1,22 @@
 <?php
 /*
 Plugin Name: SPNbabble
-Plugin URI: http://www.themespluginswp.com/plugins/spn-babblespn-babble/
+Plugin URI: http://www.themespluginswp.com/plugins/spn-babble.html
 Description: Generates SPNbabble Mini Blog Updates when a new Post is Published.
-Author: Scott Stanger
-Version: 1.3
-Author URI: http://www.highcorral.com/
+Author: Dunner, Darren, Izonei
+Version: 1.4.1
+Author URI: http://www.themespluginswp.com
 */
 
 /**
  * Changelog
  * 
+ * 1.4.1 10/23/2009
+ *			Updated the Author Information.
+ *
+ * 1.4  10/22/2009
+ *			Restricted the Settings page to Admin only. 
+ *
  * 1.3  8/19/2009
  *			Improved error handling.  If the update fails, display the
  *			response in the Custom Field "has_been_babbled".  Typical
@@ -42,7 +48,8 @@ Author URI: http://www.highcorral.com/
  * Laconica <http://laconi.ca>
  * SPNbabble <http://spnbabble.sitepronews.com>
  */
- 
+
+#	$allowed_group = 'manage_options'; 
 
 $spnbabble_plugin_name = 'SPNbabble';
 $spnbabble_plugin_prefix = 'spnbabble_';
@@ -50,7 +57,7 @@ $spnbabble_plugin_prefix = 'spnbabble_';
 // Full URI of SPNbabble without trailing slash
 define('SPNBABBLE_URI', 'http://spnbabble.sitepronews.com');
 define('SPN_API_POST_STATUS', SPNBABBLE_URI.'/api/statuses/update.json');
-define('G_VERSION', '1.3');
+define('G_VERSION', '1.4.1');
 
 add_action('publish_post', 'postPublished');
 
@@ -178,11 +185,11 @@ function doUpdate($text = '')
 	
 	require_once(ABSPATH.WPINC.'/class-snoopy.php');
 	$snoop = new Snoopy;
-	$snoop->agent = 'SPNbabble http://www.themespluginswp.com/plugins/spn-babblespn-babble/';
+	$snoop->agent = 'SPNbabble http://www.themespluginswp.com/plugins/spn-babble.html';
 	$snoop->rawheaders = array(
 		'X-Laconica-Client' => 'SPNbabble',
 		'X-Laconica-Client-Version' => G_VERSION,
-		'X-Laconica-Client-URL' => 'http://www.themespluginswp.com/plugins/spn-babblespn-babble/',
+		'X-Laconica-Client-URL' => 'http://www.themespluginswp.com/plugins/spn-babble.html',
 	);
 	$snoop->user = $spnbabble_username;
 	$snoop->pass = $spnbabble_password;
@@ -252,7 +259,7 @@ function spnbabble_options_subpanel()
 
 		<p>
 			<h3>General Options</h3>
-			You can find out more information about this plugin at <a href="http://www.themespluginswp.com/plugins/spn-babblespn-babble/">the SPNbabble Plugin page</a>.  If you have questions you may contact the author <a href="mailto:sstanger@highcorral.com">Scott Stanger</a>.
+			You can find out more information about this plugin at <a href="http://www.themespluginswp.com/plugins/spn-babble.html">the SPNbabble Plugin page</a>.
 		</p>
 		<br />
 		<form method="post">
@@ -303,9 +310,18 @@ function spnbabble_options_subpanel()
 function spnbabble_add_plugin_option()
 {
 	global $spnbabble_plugin_name;
+	$access_level = 8;	// Restrict the settings to Admin only
+	
+	//	User Level 		Role
+	//		0 				Subscriber
+	//		1 				Contributor
+	//	2, 3, 4 			Author
+	//	5, 6, 7 			Editor
+	//	8, 9, 10 		Administrator
+	
 	if (function_exists('add_options_page')) 
 	{
-		add_options_page($spnbabble_plugin_name, $spnbabble_plugin_name, 0, basename(__FILE__), 'spnbabble_options_subpanel');
+		add_options_page($spnbabble_plugin_name, $spnbabble_plugin_name, $access_level, basename(__FILE__), 'spnbabble_options_subpanel');
 	}	
 }
 
