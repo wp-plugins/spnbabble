@@ -3,14 +3,17 @@
 Plugin Name: SPNbabble
 Plugin URI: http://www.themespluginswp.com/plugins/spn-babble.html
 Description: Generates SPNbabble Mini Blog Updates when a new Post is Published.
-Author: Scott Stanger
-Version: 1.4
-Author URI: http://www.highcorral.com/
+Author: Dunner, Darren, Izonei
+Version: 1.4.1
+Author URI: http://www.themespluginswp.com
 */
 
 /**
  * Changelog
  * 
+ * 1.4.1 10/23/2009
+ *			Updated the Author Information.
+ *
  * 1.4  10/22/2009
  *			Restricted the Settings page to Admin only. 
  *
@@ -54,7 +57,7 @@ $spnbabble_plugin_prefix = 'spnbabble_';
 // Full URI of SPNbabble without trailing slash
 define('SPNBABBLE_URI', 'http://spnbabble.sitepronews.com');
 define('SPN_API_POST_STATUS', SPNBABBLE_URI.'/api/statuses/update.json');
-define('G_VERSION', '1.4');
+define('G_VERSION', '1.4.1');
 
 add_action('publish_post', 'postPublished');
 
@@ -256,7 +259,7 @@ function spnbabble_options_subpanel()
 
 		<p>
 			<h3>General Options</h3>
-			You can find out more information about this plugin at <a href="http://www.themespluginswp.com/plugins/spn-babble.html">the SPNbabble Plugin page</a>.  If you have questions you may contact the author <a href="mailto:sstanger@highcorral.com">Scott Stanger</a>.
+			You can find out more information about this plugin at <a href="http://www.themespluginswp.com/plugins/spn-babble.html">the SPNbabble Plugin page</a>.
 		</p>
 		<br />
 		<form method="post">
